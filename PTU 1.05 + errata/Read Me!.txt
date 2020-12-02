@@ -1,0 +1,14 @@
+Hey, first of all, thanks for downloading Pokémon Tabletop United 1.05! We've put a lot of work into this system over the years, and we hope you enjoy it. 
+
+At a minimum to play the game, you'll need the Core book PDF, the Pokedex PDF, and the PDF in the Errata Packets folder labeled as the February 2016 playtest. The reason for this last one is that the updated Pokedex here contains Abilities that were created in the Feb 2016 PDF. 
+
+In addition to that, there is a folder for an unofficial (but dev-approved) Alola Pokedex, along with the supplementary info on Abilities you need to use those 'mons. 
+
+The Supplements folder contains PDFs for running PTU games in other genres. We recommend leaving this aside for your first campaign. You can always come back to it later. There's a bit more detail on this in the supplementary text file for new GM advice included in this zip file! 
+
+Finally, if you wanna get in touch or read blog posts and other resources about the system, here's how:
+
+You can join our Discord server at this link: https://discord.gg/p4hr3bb
+We have a blog at this site: http://pokemontabletop.com/
+
+In addition to PTU, we've been working on a successor system called Pokémon Journeys that streamlines the game flow, reduces book-keeping, completely redoes Pokémon movesets to make every Pokémon viable, and does all this while making combat even more tactically interesting than PTU. You can find more information at our Discord server or blog. 
