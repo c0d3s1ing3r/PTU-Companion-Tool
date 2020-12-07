@@ -12,6 +12,9 @@ class Pokemon():
     _abilities = pokemon_abilities.PokemonAbilities('./people_pokemon/pokemon_abilities.json')
     _max_moves = 6
     _max_level = 100
+
+    _base_stat_points = 10
+    _base_tutor_points = 1
     # level thresholds and all that
     # ref core p. 203
     # lvl_amts is a dictionary where the key is the current level and the value is the xp necessary to get to the next one
@@ -125,8 +128,8 @@ class Pokemon():
         ref = Pokemon._pokedex.dex[reference]
         self.name = ref['name']
         self.level = 1
-        self.tutor_points = 0
-        self.stat_points = 0
+        self.tutor_points = Pokemon._base_tutor_points
+        self.stat_points = Pokemon._base_stat_points + self.level
         self.xp = 0
         self.status = None
         # loyalty 3 is considered average
@@ -156,8 +159,9 @@ class Pokemon():
         self.stealth = ref['skills']['stealth']
         self.percep = ref['skills']['percep']
         self.focus = ref['skills']['focus']
-        self.max_hp = ref['combat_stats']['HP']
-        self.current_hp = self.max_hp
+
+        self.hp = ref['combat_stats']['HP']
+        self.current_hp = self.level + (self.hp * 3) + 10
         self.atk = ref['combat_stats']['Attack']
         self.defense = ref['combat_stats']['Defense']
         self.sp_atk = ref['combat_stats']['Special Attack']
@@ -200,7 +204,7 @@ class Pokemon():
         poke.loyalty = ref['loyalty']
 
         poke.current_hp = ref['current_hp']
-        poke.max_hp = ref['max_hp']
+        poke.hp = ref['hp']
         poke.atk = ref['atk']
         poke.defense = ref['defense']
         poke.sp_atk = ref['sp_atk']
@@ -215,6 +219,8 @@ class Pokemon():
         if self.level >= Pokemon._max_level:
             return
         self.level += 1
+        self.stat_points += 1
+        self.current_hp += 1
         if self.level % 5 == 0:
             self.tutor_points += 1
         
@@ -226,7 +232,7 @@ class Pokemon():
         
         # need to handle potential multiple level ups
         self.xp += amt
-        while Pokemon._lvl_amts[self.level] >= self.xp:
+        while Pokemon._lvl_amts[self.level] <= self.xp:
             self.xp -= Pokemon._lvl_amts[self.level]
             self.level_up()
 
@@ -263,8 +269,8 @@ class Pokemon():
         
     def apply_stat_point(self, stat):
         if stat == 'HP':
-            self.max_hp += 1
-            self.current_hp += 1
+            self.hp += 1
+            self.current_hp += 3
         elif stat == 'ATK':
             self.atk += 1
         elif stat == 'DEF':
@@ -273,11 +279,15 @@ class Pokemon():
             self.sp_atk += 1
         elif stat == 'SP. DEF':
             self.sp_def += 1
-        elif stat == 'SPD':
+        elif stat == 'SPEED':
             self.spd += 1
         else:
             raise Exception('Stat point type invalid:' + str(stat))
         self.stat_points -= 1
+    
+    # should be called for health calculation, NOT RAW HP
+    def get_max_hitpoints(self):
+        return self.level + (self.hp * 3) + 10
 
     def __repr__(self):
         return self.nickname + '\n' + self.name + '\n' + self.id + '\n'

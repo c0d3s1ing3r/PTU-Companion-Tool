@@ -91,6 +91,7 @@ for line in old_file:
             effect = data[index+4].strip()
         
         index = -1
+        # I'm 12
         ass = 'null'
         for i in range(len(data)):
             if 'Class' in data[i]:

@@ -1,4 +1,4 @@
-import people_pokemon.pokemon
+import people_pokemon
 import pygame
 import pygame_menu
 
@@ -37,7 +37,7 @@ poke_theme.title_font_size = 24
 pygame.display.set_icon(icon)
 
 main_screen = pygame.display.set_mode(WINDOW_SIZE)
-pygame.display.set_caption('PokeDnD')
+pygame.display.set_caption('PTU')
 
 
 running = True
@@ -53,32 +53,34 @@ def change_menu(next_menu):
 
 # POKEMON EDITOR
 loaded_pokemon = None
+poke_reload = False
 
 pokemon_details_menu = pygame_menu.Menu(
         width=display_width, height=display_height, columns=2, rows=12, theme=poke_theme, title='Pokemon Details'
 )
 
 def update_poke_nick(newnick):
-    global loaded_pokemon
+    global loaded_pokemon, poke_reload
     loaded_pokemon.nickname = newnick
-    reload_pokemon_details_menu(loaded_pokemon)
+    poke_reload = True
+    
 
 def upgrade_poke_stat(stat):
-    global loaded_pokemon
+    global loaded_pokemon, poke_reload
     if loaded_pokemon.stat_points == 0:
         return
     loaded_pokemon.apply_stat_point(stat)
-    reload_pokemon_details_menu(loaded_pokemon)
+    poke_reload = True
 
 def save_poke():
     global loaded_pokemon
     loaded_pokemon.save()
 
 def give_xp(text):
-    global loaded_pokemon
+    global loaded_pokemon, poke_reload
     amt = int(text)
     loaded_pokemon.give_xp(amt)
-    reload_pokemon_details_menu(loaded_pokemon)
+    poke_reload = True
 
 
 def reload_pokemon_details_menu(poke):
@@ -91,9 +93,9 @@ def reload_pokemon_details_menu(poke):
     
     pokemon_details_menu.add_text_input('Nickname - ', default=loaded_pokemon.nickname, onreturn=update_poke_nick, align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_image('./people_pokemon/pokemon_images/full_images/' + loaded_pokemon.id + '.png', scale=(0.75,0.75), align=pygame_menu.locals.ALIGN_LEFT)
-    pokemon_details_menu.add_label('Level - ' + str(loaded_pokemon.level), align=pygame_menu.locals.ALIGN_LEFT)
-    pokemon_details_menu.add_label('Current EXP - ' + str(loaded_pokemon.xp), align=pygame_menu.locals.ALIGN_LEFT)
-    pokemon_details_menu.add_label('EXP to next level - ' + str(people_pokemon.pokemon.Pokemon._lvl_amts[loaded_pokemon.level]), align=pygame_menu.locals.ALIGN_LEFT)
+    pokemon_details_menu.add_label('Level: ' + str(loaded_pokemon.level), align=pygame_menu.locals.ALIGN_LEFT)
+    pokemon_details_menu.add_label('Current EXP: ' + str(loaded_pokemon.xp), align=pygame_menu.locals.ALIGN_LEFT)
+    pokemon_details_menu.add_label('EXP to next level: ' + str(people_pokemon.pokemon.Pokemon._lvl_amts[loaded_pokemon.level] - loaded_pokemon.xp), align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_label('Stat points: ' + str(loaded_pokemon.stat_points), align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_button('+ HP:       ' + str(loaded_pokemon.current_hp) + ' / ' + str(loaded_pokemon.max_hp), upgrade_poke_stat, 'HP', align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_button('+ ATK:      ' + str(loaded_pokemon.atk), upgrade_poke_stat, 'ATK', align=pygame_menu.locals.ALIGN_LEFT)
@@ -107,12 +109,6 @@ def reload_pokemon_details_menu(poke):
 
     pokemon_details_menu.add_text_input('Give EXP - ', default='0', onreturn=give_xp, align=pygame_menu.locals.ALIGN_LEFT)
     
-    
-
-
-    
-
-
 
 
 # apparently this is a very heavy way of doing things, but it's pretty portable and it worked so I don't mind too much
@@ -150,10 +146,53 @@ pokemon_editor.add_button('Choose existing pokemon', pokemon_save_selector, alig
 pokemon_editor.add_button('Choose new pokemon', pokemon_selection_menu, align=pygame_menu.locals.ALIGN_LEFT)
 
 # CHARACTER EDITOR
-char_editor = pygame_menu.Menu(
-    width=display_width, height=display_height, theme=poke_theme, title="Character Editor"
+loaded_character = None
+char_reload = False
+
+character_details_menu = pygame_menu.Menu(
+        width=display_width, height=display_height, theme=poke_theme, title="Character Editor"
 )
 
+def reload_character_details_menu(char):
+    global loaded_character
+    global character_details_menu
+    character_details_menu.clear()
+
+    if loaded_character != None:
+        loaded_character.save()
+    loaded_character = char
+
+def character_save_selector():
+    import tkinter
+    import tkinter.filedialog
+    global character_details_menu
+    tk_root = tkinter.Tk()
+
+    result = tkinter.filedialog.askopenfilename(
+        initialdir = "./", filetypes=[("Character save files", "*.chr")],
+    )
+    tk_root.destroy()
+    if result != '':
+        reload_character_details_menu(people_pokemon.people.Character.load(result))
+        change_menu(character_details_menu)
+
+def create_new_character(text):
+    global pokemon_details_menu
+    result = pokedex.search_by_name(text)
+    result = result[0][0]
+    reload_pokemon_details_menu(people_pokemon.pokemon.Pokemon(result))
+    change_menu(pokemon_details_menu)
+
+new_character_menu = pygame_menu.Menu(
+    width=display_width, height=display_height, theme=poke_theme, title="Character Editor"
+)
+new_character_menu.add_text_input('Name: ', default='Pikachu', onreturn=new_pokemon_selector, align=pygame_menu.locals.ALIGN_LEFT)
+
+character_editor = pygame_menu.Menu(
+    width=display_width, height=display_height, theme=poke_theme, title="Character Editor"
+)
+character_editor.add_button('Choose existing character', character_save_selector, align=pygame_menu.locals.ALIGN_LEFT)
+character_editor.add_button('Create new character', new_character_menu, align=pygame_menu.locals.ALIGN_LEFT)
 
 # OPTIONS MENU
 def pause_music():
@@ -173,7 +212,7 @@ character_creation = pygame_menu.Menu(
     width=display_width, height=display_height, theme=poke_theme, title="Character Creator"
 )
 character_creation.add_button('Pokemon Editor', pokemon_editor, align=pygame_menu.locals.ALIGN_LEFT)
-character_creation.add_button('Character Editor', char_editor, align=pygame_menu.locals.ALIGN_LEFT)
+character_creation.add_button('Character Editor', character_editor, align=pygame_menu.locals.ALIGN_LEFT)
 
 
 def close():
@@ -194,14 +233,6 @@ def refresh_screen():
 # Run until the user asks to quit
 while running:
 
-    # Did the user click the window close button?
-    #for event in pygame.event.get():
-    #    if event.type == pygame.QUIT:
-    #        running = False
-    #main_screen.fill((255,255,255))
-    #main_screen.blit(background,(0,0))
-    #bgfun()
-    #main_menu.mainloop(main_screen, bgfun, fps_limit=FPS)
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
@@ -214,9 +245,18 @@ while running:
         main_menu.draw(main_screen)
         main_menu.mainloop(main_screen, bgfun, fps_limit=FPS, disable_loop=True)
 
+    if poke_reload:
+        reload_pokemon_details_menu(loaded_pokemon)
+        poke_reload = False
+        change_menu(pokemon_details_menu)
+    
+    if char_reload:
+        reload_character_details_menu(loaded_character)
+        char_reload = False
+        change_menu(character_details_menu)
+
     pygame.display.update()
     
-    #pygame.display.update()
 
 if loaded_pokemon != None:
         loaded_pokemon.save()
