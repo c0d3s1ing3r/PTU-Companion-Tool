@@ -35,6 +35,8 @@ class Character():
     _base_sp_atk = 5
     _base_spd = 5
 
+    _starting_money = 5000.00
+
     def __init__(self, name):
         self.name = name
         self.level = 1
@@ -78,6 +80,8 @@ class Character():
         self.sp_atk = Character._base_sp_atk
         self.sp_def = Character._base_sp_atk
         self.spd = Character._base_spd
+
+        self.money = Character._starting_money
     
     def save(self, folder='./saves/', subfolder='characters/'):
         # 'vars' is a very cool builtin that serializes an object into a dictionary
