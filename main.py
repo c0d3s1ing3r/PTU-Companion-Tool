@@ -1,4 +1,4 @@
-import people_pokemon
+import people_pokemon.pokemon
 import pygame
 import pygame_menu
 
@@ -42,8 +42,8 @@ pygame.display.set_caption('PTU')
 
 running = True
 
-pygame.mixer.music.load('people_pokemon\Welcome to the World of Pokemon Piano Cover - Pokemon Diamond And Pearl.mp3')
-pygame.mixer.music.play(-1)
+#pygame.mixer.music.load('people_pokemon\Welcome to the World of Pokemon Piano Cover - Pokemon Diamond And Pearl.mp3')
+#pygame.mixer.music.play(-1)
 
 def bgfun():
     pass
@@ -56,7 +56,7 @@ loaded_pokemon = None
 poke_reload = False
 
 pokemon_details_menu = pygame_menu.Menu(
-        width=display_width, height=display_height, columns=2, rows=12, theme=poke_theme, title='Pokemon Details'
+        width=display_width, height=display_height, columns=2, rows=13, theme=poke_theme, title='Pokemon Details'
 )
 
 def update_poke_nick(newnick):
@@ -97,7 +97,8 @@ def reload_pokemon_details_menu(poke):
     pokemon_details_menu.add_label('Current EXP: ' + str(loaded_pokemon.xp), align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_label('EXP to next level: ' + str(people_pokemon.pokemon.Pokemon._lvl_amts[loaded_pokemon.level] - loaded_pokemon.xp), align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_label('Stat points: ' + str(loaded_pokemon.stat_points), align=pygame_menu.locals.ALIGN_LEFT)
-    pokemon_details_menu.add_button('+ HP:       ' + str(loaded_pokemon.current_hp) + ' / ' + str(loaded_pokemon.max_hp), upgrade_poke_stat, 'HP', align=pygame_menu.locals.ALIGN_LEFT)
+    pokemon_details_menu.add_label('Health: ' + str(loaded_pokemon.current_hp) + ' / ' + str(loaded_pokemon.get_max_hitpoints()), align=pygame_menu.locals.ALIGN_LEFT)
+    pokemon_details_menu.add_button('+ HP:       ' + str(loaded_pokemon.hp), upgrade_poke_stat, 'HP', align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_button('+ ATK:      ' + str(loaded_pokemon.atk), upgrade_poke_stat, 'ATK', align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_button('+ DEF:      ' + str(loaded_pokemon.defense), upgrade_poke_stat, 'DEF', align=pygame_menu.locals.ALIGN_LEFT)
     pokemon_details_menu.add_button('+ SP. ATK:  ' + str(loaded_pokemon.sp_atk), upgrade_poke_stat, 'SP. ATK', align=pygame_menu.locals.ALIGN_LEFT)
