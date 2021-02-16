@@ -1,15 +1,14 @@
 import json
 import os
 import errno
+import uuid
+import glob
 from people_pokemon import pokedex
 from people_pokemon import movedex
-from people_pokemon import pokemon_abilities
+from people_pokemon import abilitydex
 
 class Pokemon():
 
-    _pokedex = pokedex.Pokedex('./people_pokemon/pokedex.json')
-    _movedex = movedex.Movedex('./people_pokemon/pokemon_moves.json')
-    _abilities = pokemon_abilities.PokemonAbilities('./people_pokemon/pokemon_abilities.json')
     _max_moves = 6
     _max_level = 100
 
@@ -39,7 +38,7 @@ class Pokemon():
         17: 320,
         18: 360,
         19: 400,
-        20: 460, 
+        20: 460,
         21: 530,
         22: 600,
         23: 670,
@@ -122,43 +121,22 @@ class Pokemon():
         100: 0
     }
 
-    def __init__(self, reference):
+    def __init__(self, reference: str):
         # there are some other traits it would be worth it for the pokemon to have, but lots of them may be static and are probably just in the pokedex
-        self.id = reference
-        ref = Pokemon._pokedex.dex[reference]
+        self.id: str = reference
+        self.local_id: str = ""
+        ref = pokedex.Pokedex.get_by_key(reference)
+        self.ref = ref
         self.name = ref['name']
-        self.level = 1
-        self.tutor_points = Pokemon._base_tutor_points
-        self.stat_points = Pokemon._base_stat_points + self.level
-        self.xp = 0
+        self.level: int = 1
+        self.tutor_points: int = Pokemon._base_tutor_points
+        self.stat_points: int = Pokemon._base_stat_points + self.level
+        self.xp: int = 0
         self.status = None
         # loyalty 3 is considered average
-        self.loyalty = 3
-        self.nickname = self.name
+        self.loyalty: int = 3
+        self.nickname: str = self.name
         self.number = ref['number']
-        self.page_reference = ref['page_reference'] 
-        self.primary_type = ref['primary_type']
-        self.secondary_type = ref['secondary_type']
-        self.weight_class = ref['weight']['weight_class']
-        self.exact_weight = ref['weight']['true_weight']
-        self.height_class = ref['height']['height_class']
-        self.exact_height = ref['height']['true_height']
-        self.overland = ref['capabilities']['overland']
-        self.swim = ref['capabilities']['swim']
-        self.jump_l = ref['capabilities']['jump_l']
-        self.jump_h = ref['capabilities']['jump_h']
-        self.power = ref['capabilities']['power']
-        self.sky = ref['capabilities']['sky']
-        self.burrow = ref['capabilities']['burrow']
-        self.levitate = ref['capabilities']['levitate']
-        self.teleporter = ref['capabilities']['teleporter']
-        self.additional_capabilities = ref['capabilities']['additional_capabilities']
-        self.athl = ref['skills']['athl']
-        self.acro = ref['skills']['acro']
-        self.combat = ref['skills']['combat']
-        self.stealth = ref['skills']['stealth']
-        self.percep = ref['skills']['percep']
-        self.focus = ref['skills']['focus']
 
         self.hp = ref['combat_stats']['HP']
         self.current_hp = self.level + (self.hp * 3) + 10
@@ -167,18 +145,25 @@ class Pokemon():
         self.sp_atk = ref['combat_stats']['Special Attack']
         self.sp_def = ref['combat_stats']['Special Defense']
         self.spd = ref['combat_stats']['Speed']
-        self.basic_abilities = ref['basic_abilities']
-        self.advanced_abilities = ref['advanced_abilities']
-        self.high_abilities = ref['high_abilities']
+        
+
         self.learned_moves = []
-        self.obtained_abilities = []
+        self.abilities = []
+        self.forgotten_moves = []
     
     
     def save(self, folder='./saves/', subfolder='pokemon/'):
+        if self.local_id == "":
+            self.local_id = str(uuid.uuid4())
+        
         # 'vars' is a very cool builtin that serializes an object into a dictionary
-        filepath = folder + subfolder + self.nickname + '.mon'
+        filepath = folder + subfolder + self.nickname + '-' + self.local_id + '.mon'
 
-        #create the directories on the path in case they aren't there
+        for filename in glob.glob(folder + subfolder + '*.mon'):
+            if self.local_id in filename:
+                os.remove(filename)
+
+        # create the directories on the path in case they aren't there
         try:
             os.makedirs(os.path.dirname(filepath))
         except OSError as exc: # Guard against race condition
@@ -189,7 +174,7 @@ class Pokemon():
         json.dump(save, open(filepath, 'w'))
 
     @classmethod
-    def load(cls, target_file):
+    def load(cls, target_file: str):
         # read from saved dict
         # don't need to read immutable stats (TODO: remove them to begin with, easy enough to add them back)
         ref = json.load(open(target_file))
@@ -200,8 +185,9 @@ class Pokemon():
         poke.stat_points = ref['stat_points']
         poke.xp = ref['xp']
         poke.learned_moves = ref['learned_moves']
-        poke.obtained_abilities = ref['obtained_abilities']
+        poke.abilities = ref['abilities']
         poke.loyalty = ref['loyalty']
+        poke.local_id = ref['local_id']
 
         poke.current_hp = ref['current_hp']
         poke.hp = ref['hp']
@@ -232,7 +218,7 @@ class Pokemon():
         
         # need to handle potential multiple level ups
         self.xp += amt
-        while Pokemon._lvl_amts[self.level] <= self.xp:
+        while Pokemon._lvl_amts[self.level] <= self.xp and self.level < Pokemon._max_level:
             self.xp -= Pokemon._lvl_amts[self.level]
             self.level_up()
 
@@ -256,18 +242,21 @@ class Pokemon():
     # atomic option (and not as in nuclear)
     # perform the lookup before attempting to learn to prevent a situation where you could forget without learning
     def replace_move(self, old, new):
-        possible_move = Pokemon._movedex.search_by_name(new)
+        possible_move = movedex.Movedex.search_by_name(new)
         if len(possible_move) == 0:
             raise Exception('Move ' + str(new) + ' not found in movedex')
         self.forget_move(old)
         self.learn_move(possible_move)
 
     def learn_ability(self, ability):
-        possible_ability = Pokemon._abilities.search_by_name(ability)
+        possible_ability = abilitydex.PokemonAbilities.search_by_name(ability)
         if len(possible_ability) == 0:
             raise Exception('Ability ' + str(ability) + ' not found in ability catalog')
         
     def apply_stat_point(self, stat):
+        if type(stat) == tuple:
+            stat = stat[0]
+        
         if stat == 'HP':
             self.hp += 1
             self.current_hp += 3
@@ -284,6 +273,13 @@ class Pokemon():
         else:
             raise Exception('Stat point type invalid:' + str(stat))
         self.stat_points -= 1
+    
+    def roll_skill(self, skill):
+        if type(skill) == tuple:
+            stat = skill[0]
+        
+
+
     
     # should be called for health calculation, NOT RAW HP
     def get_max_hitpoints(self):
