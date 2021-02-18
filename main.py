@@ -1,8 +1,11 @@
-from gui.menus import main_menu
-import people_pokemon.pokemon
 import pygame
 import pygame.display
 import pygame.image
+import pygame.mixer
+
+from gui.menus import main_menu
+import people_pokemon.pokemon
+
 import pygame_menu
 
 import gui.gui_manager
@@ -32,10 +35,9 @@ main_menu = gui_manager.main_menu.menu
 running = True
 
 #pygame.mixer.music.load('sound\music\Welcome\Welcome to the World of Pokemon - Pokemon DiamondPearlPlatinum OST.mp3')
-#pygame.mixer.music.play(-1)
+#pygame.mixer.music.load('sound\music\owned_music\zame\Main Menu Introduction Theme.ogg')
+#pygame.mixer.music.play(loops=-1)
 
-def bgfun():
-    pass
 
 '''
 character_details_menu = pygame_menu.Menu(
