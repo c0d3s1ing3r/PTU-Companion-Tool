@@ -5,7 +5,6 @@ from gui.menus import menu_template
 from gui.menus import pokemon_details_menu
 
 from gui.menu_registry import MenuRegistry
-
 import people_pokemon.pokemon
 
 import glob

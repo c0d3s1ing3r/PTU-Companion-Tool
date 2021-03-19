@@ -5,7 +5,7 @@ class Featuredex:
     data = None
     
     @classmethod
-    def _jit_load(cls, dex_file='./people_pokemon/pokedex.json'):
+    def _jit_load(cls, dex_file='./people_pokemon/featuredex.json'):
         if cls.data == None:
             cls.data = json.load(open(dex_file))
     

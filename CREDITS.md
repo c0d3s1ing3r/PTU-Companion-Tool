@@ -1,4 +1,4 @@
-##Lead: Karl D.
+## Lead: Karl D.
 
 Special thanks to:
 
@@ -6,4 +6,4 @@ The Fantastic Developers of pygame
 
 The Fantastic Developers of pygame-menu
 
-#The Fantastic game designers @ PTU!
+# The Fantastic game designers @ PTU!

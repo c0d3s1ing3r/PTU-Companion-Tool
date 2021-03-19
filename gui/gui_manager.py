@@ -4,6 +4,7 @@ from gui.menus import main_menu
 from gui.menus import menu_template
 from gui.menus import menu_factory
 from gui.menus import pokemon_details_menu
+from gui.menus import move_list_menu
 
 from gui.menu_registry import MenuRegistry
 
@@ -50,6 +51,7 @@ class GUIManager():
         self.registered_menus = {}
         self.registered_menus[MenuRegistry.MainMenu] = self.main_menu
         self.registered_menus[MenuRegistry.PokemonDetails] = pokemon_details_menu.PokemonDetailsMenu(self.menu_factory, self, None)
+        self.registered_menus[MenuRegistry.MoveList] = pokemon_details_menu.MoveListMenu(self.menu_factory, self, None)
 
     
     def _change_menu(self, next_menu: menu_template.MenuTemplate):

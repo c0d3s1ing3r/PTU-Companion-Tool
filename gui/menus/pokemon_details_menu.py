@@ -1,10 +1,10 @@
+from gui.menu_registry import MenuRegistry
 from gui.menus import move_list_menu
 from gui.menus import menu_template
 from gui.menus.wdigets import pokemon_type
 import os
 
 import people_pokemon.pokemon
-from people_pokemon.pokedex import Pokedex
 
 class PokemonDetailsMenu(menu_template.MenuTemplate):
 
@@ -55,6 +55,7 @@ class PokemonDetailsMenu(menu_template.MenuTemplate):
         self._add_back_button()
         self._add_vertical_margin(400)
         self._add_text_input('Give EXP - ', '0', self.give_xp, maxchar=11)
+        self._add_button('View Moves')
 
     
     def update_poke_nick(self, newnick):
@@ -77,3 +78,7 @@ class PokemonDetailsMenu(menu_template.MenuTemplate):
         self.pokemon.give_xp(amt)
         self.pokemon.save()
         self._refresh_if_current()
+
+    def view_moves(self):
+        self._gui_manager.registered_menus[MenuRegistry.MoveList].change_pokemon(self.pokemon)
+        self._gui_manager.new_registered_menu(MenuRegistry.MoveList)

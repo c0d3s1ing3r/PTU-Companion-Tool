@@ -1,10 +1,14 @@
+import people_pokemon.pokemon
 from gui.menus import menu_template
 
 class MoveListMenu(menu_template.MenuTemplate):
 
-    def __init__(self, factory, manager):
+    def __init__(self, factory, manager, pokemon: people_pokemon.pokemon.Pokemon):
         super().__init__(factory, manager)
-        
+        if (pokemon == None):
+            # default is Pikachu
+            pokemon = people_pokemon.pokemon.Pokemon('025')
+        self.pokemon = pokemon
         self.rebuild_menu()
     
     def rebuild_menu(self):
